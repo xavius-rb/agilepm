@@ -1,0 +1,23 @@
+services:
+  web:
+    build:
+      context: .
+      target: prod-ready
+    command:
+      - /bin/sh
+      - -c
+      - |
+        bin/rails db:create
+        bin/rails db:migrate
+        bin/bundle exec puma -C config/puma.rb
+    ports:
+      - 80:80
+    env_file:
+      - .env.production
+
+  postgres:
+    env_file:
+      - .env.production
+  redis:
+    env_file:
+      - .env.production

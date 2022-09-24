@@ -1,0 +1,8 @@
+<%= render @card %>
+
+<div>
+  <%= link_to "Edit this card", edit_project_card_path(@card.project, @card) %> |
+  <%= link_to "Back to cards", cards_path %>
+
+  <%= button_to "Destroy this card", @card, class: "btn btn-sm btn-danger", method: :delete %>
+</div>

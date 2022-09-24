@@ -1,0 +1,62 @@
+name: "Test Code"
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  rspec:
+    runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: myAppuser
+      POSTGRES_DB: myapp
+      POSTGRES_PASSWORD: myAppDBpassWord
+      DATABASE_URL: postgresql://myAppuser:myAppDBpassWord@postgres:5432/myapp?
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Cache Docker layers
+      uses: actions/cache@v3
+      with:
+        path: /tmp/.buildx-cache
+        key: ${{ runner.os }}-multi-buildx-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-multi-buildx
+
+    - name: Build image
+      uses: docker/build-push-action@v3
+      with:
+        builder: ${{ steps.buildx.outputs.name }}
+        cache-from: type=local,src=/tmp/.buildx-cache
+        cache-to: type=local,mode=max,dest=/tmp/.buildx-cache-new
+        push: false
+        context: .
+        file: ./Dockerfile
+        target: dev
+
+    - name: Setup database
+      run: docker-compose run --rm web bin/rails db:test:prepare
+
+    - name: Run tests
+      run: docker-compose run --rm -e RAILS_ENV=test web bin/rails spec
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+
+    - name: Publish code coverage
+      continue-on-error: true
+      uses: paambaati/codeclimate-action@v3.0.0
+      env:
+        CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+      with:
+        prefix: /app
+
+    - name: Move cache
+      run: |
+        rm -rf /tmp/.buildx-cache
+        mv /tmp/.buildx-cache-new /tmp/.buildx-cache

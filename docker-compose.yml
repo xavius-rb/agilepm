@@ -1,0 +1,15 @@
+services:
+  web: &app_base
+    image: agilepm:latest
+    depends_on:
+      - postgres
+      - redis
+
+  worker:
+    <<: *app_base
+    depends_on:
+      - web
+  postgres:
+    image: postgres:15beta3-alpine
+  redis:
+    image: redis:7-alpine

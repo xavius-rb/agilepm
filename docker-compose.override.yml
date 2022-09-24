@@ -1,0 +1,59 @@
+services:
+  web: &app_base
+    command:
+      - /bin/sh
+      - -c
+      - |
+        bin/rails db:migrate
+        bin/bundle exec puma -C config/puma.rb
+    tty: true
+    stdin_open: true
+    build:
+      context: .
+      target: dev
+    ports:
+      - 3000:3000
+    volumes:
+      - .:/app
+      - bundle_data:/usr/local/bundle
+    environment:
+      - ENABLE_BOOTSNAP=true
+    env_file:
+      - .env
+
+  worker:
+    <<: *app_base
+    command: bin/bundle exec sidekiq -C config/sidekiq.yml
+    ports: []
+
+  js:
+    <<: *app_base
+    command: yarn build --watch
+    build:
+      context: .
+      target: assets
+    ports: []
+
+  css:
+    <<: *app_base
+    command: yarn build:css --watch
+    build:
+      context: .
+      target: assets
+    ports: []
+
+  postgres:
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data:cached
+    env_file:
+      - .env
+
+  redis:
+    env_file:
+      - .env
+
+volumes:
+  postgres_data:
+  bundle_data:

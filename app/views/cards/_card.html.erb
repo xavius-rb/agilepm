@@ -1,0 +1,19 @@
+<div id="<%= dom_id card %>" class="card m-2 shadow">
+  <div class="card-body">
+    <h5 class="card-title"><%= card.code %></h5>
+    <h6 class="card-subtitle mb-2 text-muted"><%= card.state %></h6>
+    <p class="card-text"><%= card.summary %></p>
+    <p><%= card.updated_at %></p>
+    <div class="card-footer">
+      <div class="btn-group btn-group-sm" role="group" aria-label="Basic outlined example">
+        <%= link_to project_card_path(card.project, card), class: "btn btn-outline-dark" do %>
+          <i class="bi bi-box-arrow-up-right"></i>
+        <% end %>
+
+        <a href="" class="btn btn-outline-dark">
+          <i class="bi bi-person"></i>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
