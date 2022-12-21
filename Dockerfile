@@ -13,7 +13,8 @@ RUN apk add --update \
   build-base \
   sqlite-dev \
   postgresql-dev \
-  tzdata
+  tzdata \
+  gcompat
 
 # Default working directory
 ARG APP_ROOT=/app
@@ -25,6 +26,7 @@ FROM base AS assets
 # assets dependencies
 RUN apk add nodejs-current npm
 RUN npm install -g yarn@1.22.19
+RUN yarn install
 
 FROM assets AS dev
 
